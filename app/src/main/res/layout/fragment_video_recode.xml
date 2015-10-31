@@ -1,0 +1,22 @@
+<FrameLayout
+xmlns:tools="http://schemas.android.com/tools"
+xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="wrap_content"
+tools:context="com.fang.videocamera.fragment.VideoRecodeFragment"
+
+android:layout_height="wrap_content">
+<com.jmolsmobile.landscapevideocapture.view.VideoCaptureView
+    android:id="@+id/videoviewmain"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="visible"
+    />
+<ImageView
+    android:id="@+id/iv_thumbnail"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginBottom="20dp"
+    android:adjustViewBounds="true"
+    android:visibility="gone"
+    android:src="@drawable/thumbnail_placeholder" />
+</FrameLayout>
