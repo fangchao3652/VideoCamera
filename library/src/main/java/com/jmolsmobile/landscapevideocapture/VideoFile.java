@@ -19,11 +19,12 @@ package com.jmolsmobile.landscapevideocapture;
 import android.os.Environment;
 
 import java.io.File;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class VideoFile {
+public class VideoFile implements Serializable{
 
 	private static final String	DIRECTORY_SEPARATOR	= "/";
 	private static final String	DATE_FORMAT			= "yyyyMMdd_HHmmss";

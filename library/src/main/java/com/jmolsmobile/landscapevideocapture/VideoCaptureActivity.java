@@ -77,7 +77,7 @@ public class VideoCaptureActivity extends Activity implements RecordingButtonInt
     private void initializeRecordingUI() {
         mVideoRecorder = new VideoRecorder(this, mCaptureConfiguration, mVideoFile, new CameraWrapper(),
                 mVideoCaptureView.getPreviewSurfaceHolder());
-        mVideoCaptureView.setRecordingButtonInterface(this);
+
 
         if (mVideoRecorded) {
             mVideoCaptureView.updateUIRecordingFinished(getVideoThumbnail());

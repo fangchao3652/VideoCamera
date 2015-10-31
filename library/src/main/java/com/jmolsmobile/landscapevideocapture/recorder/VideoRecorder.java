@@ -34,7 +34,6 @@ import com.jmolsmobile.landscapevideocapture.camera.RecordingSize;
 import com.jmolsmobile.landscapevideocapture.configuration.CaptureConfiguration;
 import com.jmolsmobile.landscapevideocapture.preview.CapturePreview;
 import com.jmolsmobile.landscapevideocapture.preview.CapturePreviewInterface;
-import com.jmolsmobile.landscapevideocapture.preview.SurfaceInterface;
 
 import java.io.IOException;
 
@@ -77,37 +76,7 @@ public class VideoRecorder implements OnInfoListener, CapturePreviewInterface {
         }
 
         mVideoCapturePreview = new CapturePreview(this, mCameraWrapper, previewHolder);
-mVideoCapturePreview.setSurfaceInterface(new SurfaceInterface() {
-    @Override
-    public void OnSurfaceCreated1() {
-        player = new MediaPlayer();
-        player.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        player.setDisplay(previewHolder);
-        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                System.out.println("视频播放完毕 video recoder");
-               /* surfaceview.setVisibility(View.GONE);
-                thumbnailIv.setVisibility(View.VISIBLE);*/
-            }
-        });
-        //设置显示视频显示在SurfaceView上
-        try {
-            player.setDataSource(mVideoFile.getFullPath());
-            player.prepareAsync();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
-    @Override
-    public void OnSurfaceDestroyed1() {
-        if (player.isPlaying()) {
-            player.stop();
-        }
-        player.release();
-    }
-});
 
     }
 

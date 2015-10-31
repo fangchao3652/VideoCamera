@@ -2,6 +2,9 @@ package com.fang.videocamera.activity;
 
 
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
@@ -18,6 +21,11 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.fang.videocamera.R;
+import com.fang.videocamera.fragment.ButtonPlayInterface;
+import com.fang.videocamera.fragment.VideoPlayFragment;
+import com.fang.videocamera.fragment.VideoPlayFragment_;
+import com.fang.videocamera.fragment.VideoRecodeFragment;
+import com.fang.videocamera.fragment.VideoRecodeFragment_;
 import com.jmolsmobile.landscapevideocapture.CLog;
 import com.jmolsmobile.landscapevideocapture.VideoFile;
 import com.jmolsmobile.landscapevideocapture.camera.CameraWrapper;
@@ -34,8 +42,8 @@ import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 
 @EActivity(R.layout.activity_main)
-public class MainActivity extends Activity implements RecordingButtonInterface, VideoRecorderInterface,SurfaceHolder.Callback {
-    private String statusMessage = null;
+public class MainActivity extends Activity {
+
     private String filename = null;
     public static final int RESULT_ERROR = 753245;
 
@@ -49,13 +57,11 @@ public class MainActivity extends Activity implements RecordingButtonInterface, 
     private boolean mVideoRecorded = false;
     VideoFile mVideoFile = null;
     private CaptureConfiguration mCaptureConfiguration;
-
-
+    private RecordingButtonInterface	mRecordingInterface;
+    private ButtonPlayInterface playInterface;
+    VideoRecodeFragment videoRecodeFragment;
     private VideoRecorder mVideoRecorder;
-    @ViewById(R.id.videoviewmain)
-    VideoCaptureView mVideoCaptureView;
-    @ViewById(R.id.iv_thumbnail)
-    ImageView iv_thumbnail;
+
     @ViewById(R.id.btn_start)
     Button btn_start;
     @ViewById(R.id.btn_stop)
@@ -64,15 +70,35 @@ public class MainActivity extends Activity implements RecordingButtonInterface, 
     Button btn_set;
     @ViewById(R.id.btn_ani)
     Button btn_ani;
+    FragmentManager fm;
+    FragmentTransaction tx;
+    Fragment frag=null;
 
+    VideoRecodeFragment recodeFragment;
+    VideoPlayFragment playFragment;
     @AfterViews
     void init() {//在oncreate 之后执行
         btn_stop.setClickable(false);
-        if (mVideoCaptureView == null) return; // Wrong orientation
-        initializeRecordingUI();
+        fm = getFragmentManager();
+        tx = fm.beginTransaction();
+         recodeFragment = VideoRecodeFragment_.builder().mVideoFile(mVideoFile).mCaptureConfiguration(mCaptureConfiguration).build();
+         playFragment= VideoPlayFragment_.builder().filename(mVideoFile.getFullPath()).build();
+        tx.add(R.id.id_content, recodeFragment, "ONE");
+        tx.add(R.id.id_content, playFragment, "TWO").hide(playFragment);
+tx.commit();
 
     }
-
+    public void switchContent(Fragment from, Fragment to) {
+        if (frag != to) {
+            frag = to;
+            FragmentTransaction transaction = fm.beginTransaction();
+            if (!to.isAdded()) {    // 先判断是否被add过
+                transaction.hide(from).add(R.id.id_content, to).commit(); // 隐藏当前的fragment，add下一个到Activity中
+            } else {
+                transaction.hide(from).show(to).commit(); // 隐藏当前的fragment，显示下一个
+            }
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,28 +109,41 @@ public class MainActivity extends Activity implements RecordingButtonInterface, 
 
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mVideoCaptureView.setRecordingButtonInterface(this);
+    public void setPlayInterface(ButtonPlayInterface playInterface) {
+        this.playInterface = playInterface;
     }
 
     @Click({R.id.btn_start, R.id.btn_stop, R.id.btn_ani, R.id.btn_set})
     void onclick(View view) {
+
         switch (view.getId()) {
             case R.id.btn_start:
-                mVideoCaptureView.doClick(0);
-                break;
+                 frag = fm.findFragmentByTag("ONE");
+                if (frag instanceof VideoRecodeFragment){
+               this.mRecordingInterface.onRecordButtonClicked();
+                    btn_start.setClickable(false);
+                    btn_stop.setClickable(true);
+            }
+            // mVideoCaptureView.doClick(0);
+            break;
             case R.id.btn_stop:
-                mVideoCaptureView.doClick(1);
+                // mVideoCaptureView.doClick(1);
+                if (frag instanceof VideoRecodeFragment){
+                    btn_start.setClickable(true);
+                    btn_stop.setClickable(false);
+                    this.mRecordingInterface.onStopButtonClicked();}
                 break;
             case R.id.btn_ani:
-                /*surfaceview.setVisibility(View.VISIBLE);
-                thumbnailIv.setVisibility(View.GONE);
-                if(mVideoRecorder.getPlayer()!=null)
-               mVideoRecorder.getPlayer().start();*/
+                switchContent(recodeFragment,playFragment);
+if(frag instanceof  VideoPlayFragment){
+playInterface.onPlayBtnClicked();
+    Log.e("fc","照着了");
+}
                 break;
         }
+    }
+    public void setRecordingButtonInterface(RecordingButtonInterface mBtnInterface) {
+        this.mRecordingInterface = mBtnInterface;
     }
 
     private void initializeCaptureConfiguration(final Bundle savedInstanceState) {
@@ -112,7 +151,7 @@ public class MainActivity extends Activity implements RecordingButtonInterface, 
         mVideoRecorded = generateVideoRecorded(savedInstanceState);
         mVideoFile = generateOutputFile(savedInstanceState);
     }
-
+/*
     private void initializeRecordingUI() {
         CameraWrapper cameraWrapper=new CameraWrapper();
 
@@ -125,105 +164,33 @@ public class MainActivity extends Activity implements RecordingButtonInterface, 
         } else {
             mVideoCaptureView.updateUINotRecording();
         }
-    }
+    }*/
 
     @Override
     protected void onPause() {
-        if (mVideoRecorder != null) {
+        /*if (mVideoRecorder != null) {
             mVideoRecorder.stopRecording(null);
-        }
-        releaseAllResources();
+        }*/
+        //releaseAllResources();
         super.onPause();
     }
 
     @Override
     public void onBackPressed() {
-        if (mVideoRecorder.isRecording()) {
+       /* if (mVideoRecorder.isRecording()) {
 
-            finishCancelled();
-        }
+            // finishCancelled();
+        }*/
         finish();
 
     }
 
-    @Override
-    public void onRecordButtonClicked() {
-        try {
-            iv_thumbnail.setVisibility(View.GONE);
-            mVideoCaptureView.setVisibility(View.VISIBLE);
-            mVideoRecorder.toggleRecording();
 
-        } catch (AlreadyUsedException e) {
-            CLog.d(CLog.ACTIVITY, "Cannot toggle recording after cleaning up all resources");
-        }
-    }
-
-    @Override
-    public void onStopButtonClicked() {
-        try {
-
-            mVideoRecorder.toggleRecording();
-        } catch (AlreadyUsedException e) {
-            e.printStackTrace();
-        }
-        finishCompleted();
-    }
-
-    @Override
-    public void onSettingButtonClicked() {
-
-    }
-
-    @Override
-    public void onAcceptButtonClicked() {
-
-    }
-
-    @Override
-    public void onAniButtonClicked() {
-
-    }
-
-    @Override
-    public void onDeclineButtonClicked() {
-        finishCancelled();
-    }
-
-    @Override
-    public void onRecordingStarted() {
-        btn_start.setClickable(false);
-        btn_stop.setClickable(true);
-        mVideoCaptureView.updateUIRecordingOngoing();
-    }
-
-    @Override
-    public void onRecordingStopped(String message) {
-
-        if (message != null) {
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-        }
-
-        mVideoCaptureView.updateUIRecordingFinished(getVideoThumbnail());
-        // releaseAllResources();
-    }
-
-    @Override
-    public void onRecordingSuccess() {
-        btn_start.setClickable(true);
-        btn_stop.setClickable(false);
-        mVideoRecorded = true;
-    }
-
-    @Override
-    public void onRecordingFailed(String message) {
-        finishError(message);
-    }
-
-    private void finishCompleted() {
-     /*   final Intent result = new Intent();
+    /*private void finishCompleted() {
+     *//*   final Intent result = new Intent();
         result.putExtra(EXTRA_OUTPUT_FILENAME, mVideoFile.getFullPath());
         this.setResult(RESULT_OK, result);
-        finish();*/
+        finish();*//*
         mVideoCaptureView.setVisibility(View.GONE);
         iv_thumbnail.setVisibility(View.VISIBLE);
         filename = mVideoFile.getFullPath();
@@ -232,25 +199,25 @@ public class MainActivity extends Activity implements RecordingButtonInterface, 
     }
 
     private void finishCancelled() {
-        /*this.setResult(RESULT_CANCELED);
-        finish();*/
+        *//*this.setResult(RESULT_CANCELED);
+        finish();*//*
         filename = null;
         updateStatusAndThumbnail();
 
     }
 
     private void finishError(final String message) {
-      /*  Toast.makeText(getApplicationContext(), "Can't capture video: " + message, Toast.LENGTH_LONG).show();
+      *//*  Toast.makeText(getApplicationContext(), "Can't capture video: " + message, Toast.LENGTH_LONG).show();
 
         final Intent result = new Intent();
         result.putExtra(EXTRA_ERROR_MESSAGE, message);
         this.setResult(RESULT_ERROR, result);
-        finish();*/
+        finish();*//*
         filename = null;
         updateStatusAndThumbnail();
     }
-
-    private void updateStatusAndThumbnail() {
+*/
+   /* private void updateStatusAndThumbnail() {
         if (statusMessage == null) {
             statusMessage = "未 捕获 ";
         }
@@ -260,13 +227,13 @@ public class MainActivity extends Activity implements RecordingButtonInterface, 
         if (thumbnail != null) {
             iv_thumbnail.setImageBitmap(thumbnail);
             DisplayMetrics dm = new DisplayMetrics();
-           /* // 取得窗口属性
+           *//* // 取得窗口属性
             this.getWindowManager().getDefaultDisplay().getMetrics(dm);
             ViewGroup.LayoutParams mParams2 = mVideoCaptureView.getLayoutParams();
             mParams2.width = dm.widthPixels;
             mParams2.height = dm.widthPixels * 1080 / 1920;
             // Toast.makeText(getActivity(), thumbnail.getHeight() + "  " +thumbnail.getWidth(), Toast.LENGTH_LONG).show();
-            mVideoCaptureView.setLayoutParams(mParams2);*/
+            mVideoCaptureView.setLayoutParams(mParams2);*//*
         } else {
             iv_thumbnail.setImageResource(R.drawable.thumbnail_placeholder);
         }
@@ -277,7 +244,7 @@ public class MainActivity extends Activity implements RecordingButtonInterface, 
         if (mVideoRecorder != null) {
             mVideoRecorder.releaseAllResources();
         }
-    }
+    }*/
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -320,18 +287,4 @@ public class MainActivity extends Activity implements RecordingButtonInterface, 
         return thumbnail;
     }
 
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-
-    }
 }

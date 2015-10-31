@@ -36,7 +36,7 @@ public class VideoCaptureView extends FrameLayout  {
 	private SurfaceView					mSurfaceView;
 	private ImageView					mThumbnailIv;
 
-	private RecordingButtonInterface	mRecordingInterface;
+	//private RecordingButtonInterface	mRecordingInterface;
 
 	public VideoCaptureView(Context context) {
 		super(context);
@@ -61,9 +61,7 @@ public class VideoCaptureView extends FrameLayout  {
 		mSurfaceView = (SurfaceView) videoCapture.findViewById(R.id.videocapture_preview_sv);
 	}
 
-	public void setRecordingButtonInterface(RecordingButtonInterface mBtnInterface) {
-		this.mRecordingInterface = mBtnInterface;
-	}
+
 
 	public SurfaceHolder getPreviewSurfaceHolder() {
 		return mSurfaceView.getHolder();
@@ -92,7 +90,7 @@ public class VideoCaptureView extends FrameLayout  {
 	}
 
 
-    public void doClick(int i) {
+/*    public void doClick(int i) {
 		if (mRecordingInterface == null) return;
 switch (i){
     case 0://开始训练
@@ -109,6 +107,6 @@ switch (i){
         break;
 }
 
-	}
+	}*/
 
 }

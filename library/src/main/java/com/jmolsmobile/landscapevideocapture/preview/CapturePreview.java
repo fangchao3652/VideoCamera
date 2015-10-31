@@ -14,10 +14,6 @@ public class CapturePreview implements SurfaceHolder.Callback {
     private boolean mPreviewRunning = false;
     private final CapturePreviewInterface mInterface;
     public final CameraWrapper mCameraWrapper;
-    SurfaceInterface surfaceInterface = null;
-    public void setSurfaceInterface(SurfaceInterface surfaceInterface) {
-        this.surfaceInterface = surfaceInterface;
-    }
 
     public CapturePreview(CapturePreviewInterface capturePreviewInterface, CameraWrapper cameraWrapper,
                           SurfaceHolder holder) {
@@ -35,8 +31,7 @@ public class CapturePreview implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(final SurfaceHolder holder) {
-        // NOP
-        surfaceInterface.OnSurfaceCreated1();
+
     }
 
     @Override
@@ -82,8 +77,7 @@ public class CapturePreview implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceDestroyed(final SurfaceHolder holder) {
-        // NOP
-        surfaceInterface.OnSurfaceDestroyed1();
+
     }
 
     public void releasePreviewResources() {
