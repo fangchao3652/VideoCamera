@@ -5,6 +5,9 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
@@ -22,6 +25,8 @@ import android.widget.Toast;
 
 import com.fang.videocamera.R;
 import com.fang.videocamera.fragment.ButtonPlayInterface;
+import com.fang.videocamera.fragment.ChartFragment;
+import com.fang.videocamera.fragment.ChartFragment_;
 import com.fang.videocamera.fragment.VideoPlayFragment;
 import com.fang.videocamera.fragment.VideoPlayFragment_;
 import com.fang.videocamera.fragment.VideoRecodeFragment;
@@ -41,6 +46,10 @@ import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.UUID;
+
 @EActivity(R.layout.activity_main)
 public class MainActivity extends Activity {
 
@@ -57,7 +66,7 @@ public class MainActivity extends Activity {
     private boolean mVideoRecorded = false;
     VideoFile mVideoFile = null;
     private CaptureConfiguration mCaptureConfiguration;
-    private RecordingButtonInterface	mRecordingInterface;
+    private RecordingButtonInterface mRecordingInterface;
     private ButtonPlayInterface playInterface;
     VideoRecodeFragment videoRecodeFragment;
     private VideoRecorder mVideoRecorder;
@@ -69,25 +78,47 @@ public class MainActivity extends Activity {
     @ViewById(R.id.btn_set)
     Button btn_set;
     @ViewById(R.id.btn_ani)
+
     Button btn_ani;
     FragmentManager fm;
     FragmentTransaction tx;
-    Fragment frag=null;
+    Fragment frag = null;
 
     VideoRecodeFragment recodeFragment;
     VideoPlayFragment playFragment;
+    ChartFragment chartFragment;
+    private BluetoothSocket socket = null;
+    private BluetoothDevice device = null;
+    private ClientThread clientConnectThread = null;
+    private readThread mreadThread = null;
+    private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    static String BlueToothAddress = "CC:07:E4:85:4F:18";
+
     @AfterViews
     void init() {//在oncreate 之后执行
         btn_stop.setClickable(false);
         fm = getFragmentManager();
         tx = fm.beginTransaction();
-         recodeFragment = VideoRecodeFragment_.builder().mVideoFile(mVideoFile).mCaptureConfiguration(mCaptureConfiguration).build();
-         playFragment= VideoPlayFragment_.builder().filename(mVideoFile.getFullPath()).build();
+        recodeFragment = VideoRecodeFragment_.builder().mVideoFile(mVideoFile).mCaptureConfiguration(mCaptureConfiguration).build();
+        playFragment = VideoPlayFragment_.builder().filename(mVideoFile.getFullPath()).build();
+        chartFragment = ChartFragment_.builder().build();
+        tx.add(R.id.id_content_chart, chartFragment, "CHART");
         tx.add(R.id.id_content, recodeFragment, "ONE");
         tx.add(R.id.id_content, playFragment, "TWO").hide(playFragment);
-tx.commit();
-
+        tx.commit();
+        initBT();
     }
+
+    /**
+     * 蓝牙操作
+     */
+    private void initBT() {
+
+        device = mBluetoothAdapter.getRemoteDevice(BlueToothAddress);
+        clientConnectThread = new ClientThread();
+        clientConnectThread.start();
+    }
+
     public void switchContent(Fragment from, Fragment to) {
         if (frag != to) {
             frag = to;
@@ -99,6 +130,7 @@ tx.commit();
             }
         }
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,30 +150,32 @@ tx.commit();
 
         switch (view.getId()) {
             case R.id.btn_start:
-                 frag = fm.findFragmentByTag("ONE");
-                if (frag instanceof VideoRecodeFragment){
-               this.mRecordingInterface.onRecordButtonClicked();
+                frag = fm.findFragmentByTag("ONE");
+                if (frag instanceof VideoRecodeFragment) {
+                    this.mRecordingInterface.onRecordButtonClicked();
                     btn_start.setClickable(false);
                     btn_stop.setClickable(true);
-            }
-            // mVideoCaptureView.doClick(0);
-            break;
+                }
+                // mVideoCaptureView.doClick(0);
+                break;
             case R.id.btn_stop:
                 // mVideoCaptureView.doClick(1);
-                if (frag instanceof VideoRecodeFragment){
+                if (frag instanceof VideoRecodeFragment) {
                     btn_start.setClickable(true);
                     btn_stop.setClickable(false);
-                    this.mRecordingInterface.onStopButtonClicked();}
+                    this.mRecordingInterface.onStopButtonClicked();
+                }
                 break;
             case R.id.btn_ani:
-                switchContent(recodeFragment,playFragment);
-if(frag instanceof  VideoPlayFragment){
-playInterface.onPlayBtnClicked();
-    Log.e("fc","照着了");
-}
+                switchContent(recodeFragment, playFragment);
+                if (frag instanceof VideoPlayFragment) {
+                    playInterface.onPlayBtnClicked();
+                    Log.e("fc", "照着了");
+                }
                 break;
         }
     }
+
     public void setRecordingButtonInterface(RecordingButtonInterface mBtnInterface) {
         this.mRecordingInterface = mBtnInterface;
     }
@@ -185,7 +219,64 @@ playInterface.onPlayBtnClicked();
 
     }
 
+    class ClientThread extends Thread {
+        @Override
+        public void run() {
+            super.run();
+            try {
+                socket = device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
+                socket.connect();
+                //启动接受数据
+                mreadThread = new readThread();
+                mreadThread.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
+    private class readThread extends Thread {
+        public void run() {
+
+            byte[] buffer = new byte[1024];
+            int bytes;
+            InputStream mmInStream = null;
+
+            try {
+                mmInStream = socket.getInputStream();
+            } catch (IOException e1) {
+
+                e1.printStackTrace();
+            }
+            while (true) {
+                try {
+                    // Read from the InputStream
+                    if ((bytes = mmInStream.read(buffer)) > 0) {
+                        byte[] buf_data = new byte[bytes];
+                        for (int i = 0; i < bytes; i++) {
+                            buf_data[i] = buffer[i];
+                        }
+                        String s = new String(buf_data);
+                        //fc 接收到的数据
+                        Fragment f = fm.findFragmentByTag("CHART");
+                        if (f instanceof ChartFragment) {
+                            ((ChartFragment) f).addData(Float.parseFloat(s));
+                        }
+                        // Toast.makeText(getApplicationContext(),s,Toast.LENGTH_SHORT).show();
+
+                    }
+                } catch (IOException e) {
+                    try {
+                        mmInStream.close();
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+                    break;
+                }
+            }
+        }
+    }
     /*private void finishCompleted() {
      *//*   final Intent result = new Intent();
         result.putExtra(EXTRA_OUTPUT_FILENAME, mVideoFile.getFullPath());

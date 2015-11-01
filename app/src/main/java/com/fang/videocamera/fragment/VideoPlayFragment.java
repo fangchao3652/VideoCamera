@@ -13,7 +13,6 @@ import android.view.ViewGroup;
 
 import com.fang.videocamera.R;
 import com.fang.videocamera.activity.MainActivity;
-import com.jmolsmobile.landscapevideocapture.view.RecordingButtonInterface;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
