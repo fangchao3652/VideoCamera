@@ -13,6 +13,6 @@
         android:id="@+id/btn_click"
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
-        android:text="点击"
-        android:layout_height="40dp" />
+        android:text="模拟数据"
+        android:layout_height="wrap_content" />
 </RelativeLayout>

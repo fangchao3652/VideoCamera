@@ -1,9 +1,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
-
+    android:background="@drawable/backgroundmain"
     android:orientation="vertical">
 
     <LinearLayout
@@ -29,60 +27,66 @@
                 android:layout_height="match_parent"
                 android:layout_weight="5"></LinearLayout>
 
-            <TableLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+
                 android:layout_weight="4"
-                android:stretchColumns="0,1">
+                android:orientation="vertical">
 
-                <TableRow android:layout_marginTop="10dp">
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:stretchColumns="0,1">
 
-                    <Button
-                        android:id="@+id/btn_start"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <TableRow android:layout_marginTop="10dp">
 
-                        android:layout_gravity="center"
-                        android:text="开始训练" />
+                        <Button
+                            android:id="@+id/btn_start"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:background="@drawable/background_start_btn" />
+
+                        <Button
+                            android:id="@+id/btn_stop"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:background="@drawable/background_end_btn"
+                            android:clickable="false" />
+                    </TableRow>
+
+                    <TableRow android:layout_marginTop="20dp">
+
+                        <Button
+                            android:id="@+id/btn_set"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:background="@drawable/background_setting_btn" />
 
 
-                    <Button
-                        android:id="@+id/btn_stop"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:clickable="false"
-                        android:text="训练结束" />
-                </TableRow>
-
-                <TableRow android:layout_marginTop="20dp">
-
-                    <Button
-                        android:id="@+id/btn_set"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="系统设置" />
+                        <Button
+                            android:id="@+id/btn_ani"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:background="@drawable/background_ani_btn" />
+                    </TableRow>
 
 
-                    <Button
-                        android:id="@+id/btn_ani"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="记录分析" />
-                </TableRow>
-                 <Button
-                    android:layout_marginTop="20dp"
+                </TableLayout>
+
+                <Button
                     android:id="@+id/btn_exit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:scaleType="centerInside"
-                    android:text="退出" />
-
-
-            </TableLayout>
-
+                    android:layout_gravity="center"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/background_exit_btn"
+                    android:scaleType="centerInside" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 

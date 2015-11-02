@@ -8,6 +8,7 @@ import android.app.FragmentTransaction;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
@@ -92,7 +93,8 @@ public class MainActivity extends Activity {
     private ClientThread clientConnectThread = null;
     private readThread mreadThread = null;
     private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    static String BlueToothAddress = "CC:07:E4:85:4F:18";
+    //static String BlueToothAddress = "CC:07:E4:85:4F:18";
+    static String BlueToothAddress = "C4:00:00:57:6A:E4";
 
     @AfterViews
     void init() {//在oncreate 之后执行
@@ -113,7 +115,10 @@ public class MainActivity extends Activity {
      * 蓝牙操作
      */
     private void initBT() {
-
+       /* if (!mBluetoothAdapter.isEnabled()) {
+            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableIntent, 3);
+        }*/
         device = mBluetoothAdapter.getRemoteDevice(BlueToothAddress);
         clientConnectThread = new ClientThread();
         clientConnectThread.start();

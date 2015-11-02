@@ -35,14 +35,15 @@ public class ChartFragment extends BaseFragment {
     @Click(R.id.btn_click)
     void click(View view) {
         // Toast.makeText(getActivity(),"ccccc",Toast.LENGTH_SHORT).show();
-        addData((float) (Math.random() * 40) + 60f);
+        addData((float) (Math.random() * 50) + 60f);
 
     }
 
 
     @AfterViews
     void init() {
-        mChart.setBackgroundColor(Color.rgb(104, 241, 175));
+        //mChart.setBackgroundColor(Color.rgb(104, 241, 175));
+        mChart.setBackgroundColor(Color.BLACK);
         mChart.setDescription("");
         // enable touch gestures
         mChart.setTouchEnabled(true);
@@ -54,29 +55,29 @@ public class ChartFragment extends BaseFragment {
 
         mChart.setDrawGridBackground(false);
         tf = Typeface.createFromAsset(getActivity().getAssets(), "OpenSans-Regular.ttf");
-        LimitLine ll1 = new LimitLine(100f, "");
-        ll1.setLineWidth(0.5f);
+        LimitLine ll1 = new LimitLine(100f, "100");
+        ll1.setLineWidth(2f);
 
-        ll1.enableDashedLine(2f, 2f, 0f);
+        ll1.enableDashedLine(5f, 5f, 0f);
         ll1.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_TOP);
         ll1.setTextSize(6f);
-
-
         ll1.setTypeface(tf);
 
-        LimitLine ll2 = new LimitLine(50f, "");
-        ll2.setLineWidth(0.5f);
-        ll2.enableDashedLine(2f, 2f, 0f);
+        LimitLine ll2 = new LimitLine(50f, "50");
+        ll2.setLineWidth(2f);
+
+        ll2.enableDashedLine(5f, 5f, 0f);
         ll2.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_BOTTOM);
         ll2.setTextSize(6f);
         ll2.setTypeface(tf);
         //X轴
-        mChart.getXAxis().setEnabled(true);
+        mChart.getXAxis().setEnabled(false);
         //Y轴
         YAxis leftAxis = mChart.getAxisLeft();
         leftAxis.removeAllLimitLines(); // reset all limit lines to avoid overlapping lines
         leftAxis.addLimitLine(ll1);
         leftAxis.addLimitLine(ll2);
+        leftAxis.setTextColor(Color.WHITE);
        /* leftAxis.setAxisMaxValue(220f);
         leftAxis.setAxisMinValue(-20f);
         leftAxis.setStartAtZero(false);*/
@@ -162,8 +163,9 @@ public class ChartFragment extends BaseFragment {
         set.setDrawCubic(true);
         set.setCubicIntensity(0.2f);
         set.setCircleColor(Color.WHITE);
-        set.setLineWidth(2f);
+        set.setLineWidth(3f);
         set.setCircleSize(4f);
+
         set.setFillAlpha(100);
         set.setFillColor(ColorTemplate.getHoloBlue());
         set.setHighLightColor(Color.rgb(244, 117, 117));
