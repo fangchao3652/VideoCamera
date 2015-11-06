@@ -120,7 +120,7 @@ public class CameraWrapper {
     }
 
     protected Camera openCameraFromSystem() {
-        return Camera.open(CameraInfo.CAMERA_FACING_BACK);
+        return Camera.open(CameraInfo.CAMERA_FACING_FRONT);
     }
 
     protected void unlockCameraFromSystem() {

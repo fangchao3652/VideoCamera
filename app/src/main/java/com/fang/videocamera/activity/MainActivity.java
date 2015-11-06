@@ -79,7 +79,6 @@ public class MainActivity extends Activity {
     @ViewById(R.id.btn_set)
     Button btn_set;
     @ViewById(R.id.btn_ani)
-
     Button btn_ani;
     FragmentManager fm;
     FragmentTransaction tx;
@@ -155,6 +154,7 @@ public class MainActivity extends Activity {
 
         switch (view.getId()) {
             case R.id.btn_start:
+                switchContent(playFragment, recodeFragment);
                 frag = fm.findFragmentByTag("ONE");
                 if (frag instanceof VideoRecodeFragment) {
                     this.mRecordingInterface.onRecordButtonClicked();
@@ -175,7 +175,7 @@ public class MainActivity extends Activity {
                 switchContent(recodeFragment, playFragment);
                 if (frag instanceof VideoPlayFragment) {
                     playInterface.onPlayBtnClicked();
-                    Log.e("fc", "照着了");
+                    Log.e("fc", "分析。。。。");
                 }
                 break;
         }
@@ -383,4 +383,37 @@ public class MainActivity extends Activity {
         return thumbnail;
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        shutdownClient();
+    }
+
+    /* 停止客户端连接 */
+    private void shutdownClient() {
+        new Thread() {
+            public void run() {
+                if(clientConnectThread!=null)
+                {
+                    clientConnectThread.interrupt();
+                    clientConnectThread= null;
+                }
+                if(mreadThread != null)
+                {
+                    mreadThread.interrupt();
+                    mreadThread = null;
+                }
+                if (socket != null) {
+                    try {
+                        socket.close();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    socket = null;
+                }
+            };
+        }.start();
+    }
 }

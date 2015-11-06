@@ -32,7 +32,6 @@ String filename;
     void init(){
         Log.e("fc","init");
         holder = surfaceview.getHolder();
-
         holder.addCallback(this);
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
@@ -77,17 +76,11 @@ String filename;
     @Override
     public void surfaceCreated(SurfaceHolder holder12) {
         Log.e("fc","surfaceCreated");
+
         player = new MediaPlayer();
         player.setAudioStreamType(AudioManager.STREAM_MUSIC);
         player.setDisplay(holder);
-        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                //  System.out.println("视频播放完毕");
-               // surfaceview.setVisibility(View.GONE);
 
-            }
-        });
         //设置显示视频显示在SurfaceView上
         try {
             if(player!=null){
@@ -117,7 +110,7 @@ String filename;
     }
 
 
-    @Override
+   /* @Override
     public void onDestroy() {
         super.onDestroy();
         if(player!=null){
@@ -125,13 +118,16 @@ String filename;
             player.stop();
         }
         player.release();}
-    }
+    }*/
 
 
 
     @Override
     public void onPlayBtnClicked() {
+
         if(player!=null)
             player.start();
+        else{}
+        surfaceview.refreshDrawableState();
     }
 }
