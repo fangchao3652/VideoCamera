@@ -57,12 +57,12 @@ public class MainActivity extends Activity {
     private String filename = null;
     public static final int RESULT_ERROR = 753245;
 
-    public static final String EXTRA_OUTPUT_FILENAME = "com.jmolsmobile.extraoutputfilename";
-    public static final String EXTRA_CAPTURE_CONFIGURATION = "com.jmolsmobile.extracaptureconfiguration";
-    public static final String EXTRA_ERROR_MESSAGE = "com.jmolsmobile.extraerrormessage";
+    public static final String EXTRA_OUTPUT_FILENAME = "com.fangchao.extraoutputfilename";
+    public static final String EXTRA_CAPTURE_CONFIGURATION = "com.fangchao.extracaptureconfiguration";
+    public static final String EXTRA_ERROR_MESSAGE = "com.fangchao.extraerrormessage";
 
-    private static final String SAVED_RECORDED_BOOLEAN = "com.jmolsmobile.savedrecordedboolean";
-    protected static final String SAVED_OUTPUT_FILENAME = "com.jmolsmobile.savedoutputfilename";
+    private static final String SAVED_RECORDED_BOOLEAN = "com.fangchao.savedrecordedboolean";
+    protected static final String SAVED_OUTPUT_FILENAME = "com.fangchao.savedoutputfilename";
 
     private boolean mVideoRecorded = false;
     VideoFile mVideoFile = null;
