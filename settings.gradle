@@ -1,0 +1,2 @@
+include ':app', ':library', ':MPChartLib'
+include ':openCVLibrary300'
