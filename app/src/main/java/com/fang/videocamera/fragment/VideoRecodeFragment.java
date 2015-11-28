@@ -1,12 +1,18 @@
 package com.fang.videocamera.fragment;
 
 
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.ThumbnailUtils;
+import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.fang.videocamera.R;
@@ -41,15 +47,54 @@ public class VideoRecodeFragment extends BaseFragment implements RecordingButton
     VideoCaptureView mVideoCaptureView;
     @ViewById(R.id.iv_thumbnail)
     ImageView iv_thumbnail;
-
-@AfterViews
+    CameraWrapper cameraWrapper;
+    @AfterViews
 void init (){
-    ( (MainActivity)getActivity()).setRecordingButtonInterface(this);
-    initializeRecordingUI();
-}
+        Log.e("fc_recoder", "init");
+        initializeRecordingUI();
+    }
+
+
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        Log.e("fc_recoder", "onCreateView");
+        return super.onCreateView(inflater, container, savedInstanceState);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        Log.e("fc_recoder", "onCreate");
+        ( (MainActivity)getActivity()).setRecordingButtonInterface(this);
+
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        Log.e("fc_recoder", "onAttach");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+
+        Log.e("fc_recoder","onresume");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.e("fc_recoder", "onPause");
+
+    }
 
     private void initializeRecordingUI() {
-        CameraWrapper cameraWrapper=new CameraWrapper();
+          cameraWrapper=new CameraWrapper();
 
         mVideoRecorder = new VideoRecorder(this, mCaptureConfiguration, mVideoFile, cameraWrapper,
                 mVideoCaptureView.getPreviewSurfaceHolder());
@@ -79,6 +124,7 @@ void init (){
             mVideoRecorder.toggleRecording();
 
         } catch (AlreadyUsedException e) {
+
             CLog.d(CLog.ACTIVITY, "Cannot toggle recording after cleaning up all resources");
         }
     }
@@ -197,6 +243,8 @@ void init (){
     @Override
     public void onDestroy() {
         super.onDestroy();
-        releaseAllResources();
+        Log.e("fc_recoder", "onDestroy....");
+
+       // releaseAllResources();
     }
 }

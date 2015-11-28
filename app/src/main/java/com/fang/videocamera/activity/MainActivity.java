@@ -8,21 +8,15 @@ import android.app.FragmentTransaction;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Intent;
 import android.graphics.Bitmap;
-import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.fang.videocamera.R;
 import com.fang.videocamera.fragment.ButtonPlayInterface;
@@ -34,13 +28,9 @@ import com.fang.videocamera.fragment.VideoRecodeFragment;
 import com.fang.videocamera.fragment.VideoRecodeFragment_;
 import com.jmolsmobile.landscapevideocapture.CLog;
 import com.jmolsmobile.landscapevideocapture.VideoFile;
-import com.jmolsmobile.landscapevideocapture.camera.CameraWrapper;
 import com.jmolsmobile.landscapevideocapture.configuration.CaptureConfiguration;
-import com.jmolsmobile.landscapevideocapture.recorder.AlreadyUsedException;
 import com.jmolsmobile.landscapevideocapture.recorder.VideoRecorder;
-import com.jmolsmobile.landscapevideocapture.recorder.VideoRecorderInterface;
 import com.jmolsmobile.landscapevideocapture.view.RecordingButtonInterface;
-import com.jmolsmobile.landscapevideocapture.view.VideoCaptureView;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
@@ -50,6 +40,7 @@ import org.androidannotations.annotations.ViewById;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
+import java.util.concurrent.Semaphore;
 
 @EActivity(R.layout.activity_main)
 public class MainActivity extends Activity {
@@ -107,7 +98,7 @@ public class MainActivity extends Activity {
         tx.add(R.id.id_content, recodeFragment, "ONE");
         tx.add(R.id.id_content, playFragment, "TWO").hide(playFragment);
         tx.commit();
-        initBT();
+        //initBT();
     }
 
     /**
@@ -154,9 +145,25 @@ public class MainActivity extends Activity {
 
         switch (view.getId()) {
             case R.id.btn_start:
-                switchContent(playFragment, recodeFragment);
-                frag = fm.findFragmentByTag("ONE");
-                if (frag instanceof VideoRecodeFragment) {
+                // switchContent(playFragment, recodeFragment);
+                tx=fm.beginTransaction();
+                if (recodeFragment == null) {
+                    recodeFragment = VideoRecodeFragment_.builder().mVideoFile(mVideoFile).mCaptureConfiguration(mCaptureConfiguration).build();
+                    tx.add(R.id.id_content, recodeFragment);
+                } else {
+                    tx.hide(playFragment);
+                    tx.show(recodeFragment);
+                }
+                tx.commit();
+                fm.executePendingTransactions();
+               /* recodeFragment = VideoRecodeFragment_.builder().mVideoFile(mVideoFile).mCaptureConfiguration(mCaptureConfiguration).build();
+
+                fm.beginTransaction().replace(R.id.id_content, recodeFragment).commit(); // 替换Fragment，实现切换
+                       fm .executePendingTransactions();
+
+                // frag = fm.findFragmentByTag("ONE");*/
+               frag=recodeFragment;
+                if (frag instanceof VideoRecodeFragment&&mRecordingInterface!=null) {
                     this.mRecordingInterface.onRecordButtonClicked();
                     btn_start.setClickable(false);
                     btn_stop.setClickable(true);
@@ -164,7 +171,9 @@ public class MainActivity extends Activity {
                 // mVideoCaptureView.doClick(0);
                 break;
             case R.id.btn_stop:
+
                 // mVideoCaptureView.doClick(1);
+                //frag=recodeFragment;
                 if (frag instanceof VideoRecodeFragment) {
                     btn_start.setClickable(true);
                     btn_stop.setClickable(false);
@@ -172,13 +181,22 @@ public class MainActivity extends Activity {
                 }
                 break;
             case R.id.btn_ani:
-                switchContent(recodeFragment, playFragment);
+                tx = fm.beginTransaction();
+                if (playFragment == null) {
+                    playFragment = VideoPlayFragment_.builder().filename(mVideoFile.getFullPath()).build();
+                    tx.add(R.id.id_content, playFragment);
+                } else {
+                    tx.hide(recodeFragment);
+                    tx.show(playFragment);
+                }
+                frag = playFragment;
                 if (frag instanceof VideoPlayFragment) {
                     playInterface.onPlayBtnClicked();
                     Log.e("fc", "分析。。。。");
-                }
+                }tx.commit();
                 break;
         }
+
     }
 
     public void setRecordingButtonInterface(RecordingButtonInterface mBtnInterface) {
@@ -394,13 +412,11 @@ public class MainActivity extends Activity {
     private void shutdownClient() {
         new Thread() {
             public void run() {
-                if(clientConnectThread!=null)
-                {
+                if (clientConnectThread != null) {
                     clientConnectThread.interrupt();
-                    clientConnectThread= null;
+                    clientConnectThread = null;
                 }
-                if(mreadThread != null)
-                {
+                if (mreadThread != null) {
                     mreadThread.interrupt();
                     mreadThread = null;
                 }
@@ -413,7 +429,9 @@ public class MainActivity extends Activity {
                     }
                     socket = null;
                 }
-            };
+            }
+
+            ;
         }.start();
     }
 }

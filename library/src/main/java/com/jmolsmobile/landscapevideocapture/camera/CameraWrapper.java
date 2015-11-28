@@ -115,7 +115,7 @@ public class CameraWrapper {
 
     public void enableAutoFocus() {
         final Parameters params = getCameraParametersFromSystem();
-        params.setFocusMode(Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+        params.setFocusMode(Parameters.FOCUS_MODE_AUTO);
         mCamera.setParameters(params);
     }
 

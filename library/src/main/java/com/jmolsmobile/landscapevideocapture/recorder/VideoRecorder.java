@@ -16,14 +16,11 @@
 
 package com.jmolsmobile.landscapevideocapture.recorder;
 
-import android.media.AudioManager;
 import android.media.CamcorderProfile;
-import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.media.MediaRecorder.OnInfoListener;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.View;
 
 import com.jmolsmobile.landscapevideocapture.CLog;
 import com.jmolsmobile.landscapevideocapture.VideoFile;
@@ -39,14 +36,12 @@ import java.io.IOException;
 
 public class VideoRecorder implements OnInfoListener, CapturePreviewInterface {
 
-    private       CameraWrapper  mCameraWrapper;
-    private final Surface        mPreviewSurface;
-    private       CapturePreview mVideoCapturePreview;
+    private CameraWrapper mCameraWrapper;
+    private final Surface mPreviewSurface;
+    private CapturePreview mVideoCapturePreview;
 
     private final CaptureConfiguration mCaptureConfiguration;
-    private final VideoFile            mVideoFile;
-    MediaPlayer player;
-
+    private final VideoFile mVideoFile;
     private MediaRecorder mRecorder;
     private boolean mRecording = false;
     private final VideoRecorderInterface mRecorderInterface;
@@ -62,9 +57,6 @@ public class VideoRecorder implements OnInfoListener, CapturePreviewInterface {
         initializeCameraAndPreview(previewHolder);
     }
 
-    public MediaPlayer getPlayer() {
-        return player;
-    }
 
     protected void initializeCameraAndPreview(final SurfaceHolder previewHolder) {
         try {
@@ -107,12 +99,19 @@ public class VideoRecorder implements OnInfoListener, CapturePreviewInterface {
     public void stopRecording(String message) {
         if (!isRecording()) return;
         try {
-            getMediaRecorder().stop();
+            getMediaRecorder().setOnErrorListener(null);
+           getMediaRecorder().stop();
+           /*  getMediaRecorder().reset();
+            getMediaRecorder().release();
+
+            mCameraWrapper.lockCameraFromSystem();*/
+
             mRecorderInterface.onRecordingSuccess();
             CLog.d(CLog.RECORDER, "Successfully stopped recording - outputfile: " + mVideoFile.getFullPath());
         } catch (final RuntimeException e) {
             CLog.d(CLog.RECORDER, "Failed to stop recording");
         }
+
         mRecording = false;
         mRecorderInterface.onRecordingStopped(message);
     }
@@ -126,8 +125,9 @@ public class VideoRecorder implements OnInfoListener, CapturePreviewInterface {
             CLog.e(CLog.RECORDER, "Failed to initialize recorder - " + e.toString());
             return false;
         }
-
+        mRecorder=null;
         mRecorder = new MediaRecorder();
+
         configureMediaRecorder(getMediaRecorder(), mCameraWrapper.getCamera());
 
         CLog.d(CLog.RECORDER, "MediaRecorder successfully initialized");
